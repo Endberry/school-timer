@@ -247,6 +247,15 @@
   #nameForm{display:flex;gap:8px;}
   #nameInput{flex:1;min-width:0;font:600 14px 'Manrope',sans-serif;padding:8px 14px;border:2px solid var(--bg-soft);border-radius:999px;}
   #lbMsg{font-size:13px;color:var(--ink-soft);margin:8px 0;min-height:1em;}
+
+  .lb-panel{position:fixed;left:20px;bottom:20px;z-index:10;width:min(240px,52vw);padding:12px 12px 10px;border-radius:14px;background:var(--bg-soft);display:flex;flex-direction:column;gap:6px;text-align:left;}
+  .lb-panel .score-label{text-align:center;}
+  .lb-panel #lbList{margin:0;}
+  .lb-panel #lbList li{padding:3px 8px;gap:8px;font-size:12px;}
+  .lb-panel #lbList .rk{width:18px;}
+  .lb-panel #lbList li.me{background:var(--red-soft);}
+  @media (max-width:520px){ .lb-panel #lbList li:nth-child(n+4){display:none;} }
+  #lbMe{font-size:13px;font-weight:700;color:var(--ink-soft);text-align:center;min-height:1em;}
 </style>
 </head>
 <body>
@@ -293,19 +302,21 @@
     <button class="pill" id="logoutBtn" type="button" hidden>Déconnexion</button>
   </div>
 
-  <button class="info-button lb-button" id="lbButton" aria-label="Classement" type="button">★</button>
+  <section class="lb-panel" aria-label="Classement">
+    <div class="score-label">CLASSEMENT</div>
+    <ol id="lbList"></ol>
+    <div id="lbMe"></div>
+  </section>
 
-  <div class="overlay" id="lbOverlay">
+  <div class="overlay" id="nameOverlay">
     <div class="info-popup">
-      <button class="info-popup-close" id="lbClose" aria-label="Fermer" type="button">&times;</button>
-      <h2>Classement</h2>
-      <form id="nameForm" hidden>
+      <button class="info-popup-close" id="nameClose" aria-label="Fermer" type="button">&times;</button>
+      <h2>Ton pseudo</h2>
+      <form id="nameForm">
         <input id="nameInput" maxlength="20" placeholder="Ton pseudo (2 à 20 caractères)" autocomplete="off">
         <button class="pill" type="submit">OK</button>
       </form>
       <div id="lbMsg"></div>
-      <ol id="lbList"></ol>
-      <button class="pill" id="lbRefresh" type="button">Actualiser</button>
     </div>
   </div>
 
@@ -432,7 +443,6 @@
     $('loginBtn').hidden = !!user;
     $('logoutBtn').hidden = !user;
     $('userName').textContent = user ? (name || 'Pseudo à choisir') : '';
-    $('nameForm').hidden = !user;
     $('nameInput').value = name || '';
   }
 
@@ -454,9 +464,9 @@
   }
 
   async function loadBoard(){
-    var ul = $('lbList'), msg = $('lbMsg');
+    var ul = $('lbList'), msg = $('lbMe');
     try {
-      var snap = await getDocs(query(col, orderBy('score', 'desc'), limit(20)));
+      var snap = await getDocs(query(col, orderBy('score', 'desc'), limit(10)));
       ul.replaceChildren();
       var i = 0, inTop = false;
       snap.forEach(function(d){
@@ -476,22 +486,24 @@
     } catch(e) { ul.textContent = 'Classement indisponible.'; }
   }
 
-  function openBoard(note){
-    $('lbOverlay').classList.add('open');
-    loadBoard().then(function(){ if (note) $('lbMsg').textContent = note; });
+  function openName(note){
+    $('nameOverlay').classList.add('open');
+    $('lbMsg').textContent = note || '';
+    $('nameInput').focus();
   }
+  function closeName(){ $('nameOverlay').classList.remove('open'); }
 
   onAuthStateChanged(auth, async function(u){
     user = u; name = null; sent = -1; ui();
-    if (!u) return;
+    if (!u){ loadBoard(); return; }
     try {
       var d = await getDocFromServer(ref());
       if (d.exists()){
         name = d.data().name; sent = d.data().score;
         if (sent > TM.get()) TM.set(sent);
-      } else openBoard('Choisis un pseudo pour apparaître au classement.');
+      } else openName('Choisis un pseudo pour apparaître au classement.');
     } catch(e) {}
-    ui(); sync();
+    ui(); sync(); loadBoard();
   });
 
   $('nameForm').addEventListener('submit', async function(e){
@@ -500,17 +512,19 @@
     if (!user || n.length < 2 || n.length > 20){ $('lbMsg').textContent = 'Le pseudo doit contenir 2 à 20 caractères.'; return; }
     try {
       await setDoc(ref(), { name: n, score: TM.get(), updatedAt: serverTimestamp() });
-      name = n; sent = TM.get(); ui(); loadBoard();
+      name = n; sent = TM.get(); ui(); closeName(); loadBoard();
     } catch(err) { $('lbMsg').textContent = "Impossible d'enregistrer le pseudo."; }
   });
 
   $('loginBtn').addEventListener('click', function(){ signInWithPopup(auth, new GoogleAuthProvider()).catch(function(){}); });
   $('logoutBtn').addEventListener('click', function(){ sync().finally(function(){ signOut(auth); }); });
-  $('lbButton').addEventListener('click', function(){ openBoard(); });
-  $('lbRefresh').addEventListener('click', loadBoard);
-  $('lbClose').addEventListener('click', function(){ $('lbOverlay').classList.remove('open'); });
-  $('lbOverlay').addEventListener('click', function(e){ if (e.target === $('lbOverlay')) $('lbOverlay').classList.remove('open'); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') $('lbOverlay').classList.remove('open'); });
+  $('nameClose').addEventListener('click', closeName);
+  $('nameOverlay').addEventListener('click', function(e){ if (e.target === $('nameOverlay')) closeName(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeName(); });
+
+  // Actualisation automatique du classement (toutes les 2 min, page visible seulement)
+  var REFRESH_MS = 120000;
+  setInterval(function(){ if (document.visibilityState === 'visible') loadBoard(); }, REFRESH_MS);
 
   setInterval(function(){ if (document.visibilityState === 'visible') sync(); }, SYNC_MS);
   document.addEventListener('visibilitychange', function(){ if (document.hidden) sync(); });
