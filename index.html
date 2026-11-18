@@ -272,6 +272,20 @@
   html[data-theme="dark"] .set-row img{filter:invert(1);}
   #setMsg{font-size:13px;color:var(--ink-soft);min-height:1em;}
   #lbMe{font-size:13px;font-weight:700;color:var(--ink-soft);text-align:center;min-height:1em;}
+
+  /* ---------- Admin + annonces ---------- */
+  .info-button[hidden]{display:none;}
+  .admin-button{right:128px;}
+  @media (max-width:520px){ .admin-button{right:24px;bottom:76px;} }
+  .adm-label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin:14px 0 6px;}
+  .adm-field{display:block;width:100%;font:600 14px 'Manrope',sans-serif;padding:10px 14px;border:2px solid var(--bg-soft);border-radius:12px;background:var(--bg);color:var(--ink);}
+  textarea.adm-field{resize:vertical;}
+  #adminForm .pill{margin-top:16px;}
+  #admMsg{font-size:13px;color:var(--ink-soft);margin-top:12px;min-height:1em;line-height:1.5;}
+  #annOverlay{z-index:200;}
+  .ann-popup{text-align:center;}
+  .ann-popup .score-label{margin-bottom:16px;}
+  #annText{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.6;font-weight:600;margin-bottom:24px;}
 </style>
 </head>
 <body>
@@ -337,6 +351,8 @@
 
   <button class="info-button set-button" id="setBtn" aria-label="Paramètres" type="button"><img class="gear" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdklEQVR42uWbS28cRRDHfzNe2wmYYAUnxlgCJEQwDyFOXDgA5iMgJUKKkq8BkbCTSxJFicKFxwEhcoFDvgOxj3Yk+4gVg4QDyHFIDii8nN2d4eAqqbY9u/Ps8drbUitZa7q6q7q66t//7g7wXwIgTvjbYWBYfreAf4EoQ9vKB1eH8sPAR8As8CIwAYwBI/LdY+Bv4AHwC3AL+E7+7t0Ivkoog58ClkSJPPU2MC0ywv1qgBBYEIW2gaa4e1tqJFV/t6RuS5tFYGg/GmBI/n1fFGkW8ABtM+vIrHyWfMaWt0uu31hkeItXPl0rAJ4qOfAAOOIzWPsygLrxiQpkvWzk7WkJMs6EBr+nJa3FEujyxgBt80BkhRknLKjaY4KEANTo0klgcvtFUaBVQPnYaXtRZI706LeREIiDKpfIMDCe0ElDqjXSSZPWohIGiEzaPJmhX2SMw1Usc234HPAFsA7cB1aBTwTNueUZ4ILJ72WUt0bQekH6cMuEjGlVxrguY55OM0LQQ/kIeAn4AXg+4Zv7AnLW5PcrwHvApAlYQYVBVeVtmX4DYEb6PZ7Q7i7wAfCT0Snzmh8FVgyKaxvU1sqwbn3UtH7tGBVNrooumWOCrqnrIuBxD9dsOjXyqHyRfnXs17OiSf3gHQNH61DKt7Fi0SnVCKF8sFKDO9dVVYeVtI2V5tEzB0h51whnHV13oadR4I4JJAfFABoc74iOu9CiWuTUAZx91wtOJXmBrotFg77qmJW2k758GyASDNEBjvQ/U8A/JTYveaNyNxLEZ9+xcI9Tqrt1gyOyPnyVtsHwAL8KmgQ4Jmiz4Xzro4wKT7HpwuExGVDbQwDUJfU7MA+8JbS4lkPAm8CcfOMjDqleW6JrB1RXa1+Tj//zoPw3MtNpe/dj8m3VRlCdriYBIqWexyQQxhV5gSow72Sc0FFc+7dL8nyFRlBdFkTHMGlfEJg1ctnZipZR/oajeJZtuBriRkkj2PFfMjEuyEInnS6REjWtbeaks1xabRy4VwKYaeo7nYcus7TWlYIzoKnu027QM0PRNvMFzxZ0zFdS6LTUGXhYABuo57xW4mhL1+kbBYCSJVTHC3hgR5S8mXMG1FU3jCcVYYZsTLqbMzDrWG+mbYHDDPTyWkH6aotyp7uxtN0WWRSQs5a27n2fDPV9CTOc7swUVHxS3DcusQRikXG8oFFnip4qVREE2xLAygbB10sEwYdpQTDsccoSAeeAozKAPNZvi+wPZSBFDRCLjFBk5vGetoz9nOjSyIoBqgZCRdKQPV/crAsI2bRzqU+g8LcVQuHLvaCw783Q+QKboTkPm6HFbpshBQpX+2A7PAF87XE7fM0FR5YQ2aqBEJkT8uNQF0LktzoJkcAcGp4AfjTRt2og49JcG4YSm3QOYH1QYqpTBLwqFHkHJ/hI3OQJT6BryMxEA3hBqi0t+c4XH4jo+Mg9Bg8l3Syb6OkLHjccsGRBTgN/EFr7uC26hkAUOoDoq5owfGDOIYe6UVSe+v0yCQQO/NGYZWDOHuDD0TNpDNVAH49bcDCwFyTsB58xgFdkNCDqJalV9v8lqRV6XJKq6pqcMkfvAs/i95rcPdnUZL0mNwv8TI5rci5ZMk1/XZQ8mtDvBPAxnRclP2fnkmcp7nOgr8q6McHFDANxWTpt755GZ1VxXf4PPF6XD3MGoiz0ciQD+FMCKDkJTZw2t0RWkDGI5aLBfb4ZCgR7ly3reHgEUcfJUCz77niPZeyJAXTAy5R/NLXkyNw3JenhZIv0h5NNg+IWKHi03S8GCASMLBfIAkvs3Ofz+nS2rsfTI+x+PP0knY+n/5KUtyHZ43vxBq+Pp+uioeIE7zhswEuTnefzcYa2lZb/AYov1r/xYa4JAAAAAElFTkSuQmCC"></button>
 
+  <button class="info-button admin-button" id="adminBtn" aria-label="Panel admin" type="button" hidden><img class="gear" alt="" src="data:image/png;base64,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"></button>
+
   <div class="overlay" id="setOverlay">
     <div class="info-popup">
       <button class="info-popup-close" id="setClose" aria-label="Fermer" type="button">&times;</button>
@@ -344,6 +360,36 @@
       <button class="set-row" id="pseudoBtn" type="button">Changer mon pseudo</button>
       <button class="set-row" id="themeBtn" type="button"><img id="themeIcon" alt="" data-light="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAKoElEQVR42u2dXYxdVRXHf+fOdFpkOkyKdugEO4Qi0RakhBBoS1ASSU1aSoVgYgySiJrU0D63wa/EF+FB8cXogy+8Kg9tTOhUscbYoqYvSAWisd+UqS0N03Zq7cw914e7VmbN7t7nnHvuOTP3jGclJzP33nP3WWvttf9r7bX32hdqqqmmmmqqqaaaclAkV03zTA25Qq9rKln5SsuBwcBnNZUEOQD3AK8B78v1mrxHDUnlWn4ErAMuAi3nugislXvqkVAC9cnffaLwa0As1zV5b69zb00FQ8/NwIRRvFq/vp6QeyoDRVUbqsuAJQHlRvLZsqpGFFWgVkH31B2Qk2YM9PgUH8s9dQeUYPkN4DLwD4GbGadjIvnsstzb4v+UIolC+uVvUc5QI5vHPc5XX3+h4CioLFnmfUQ1Cm7/KeA9o/h35b0ynlUqakQFt9UClgKbgTuBM8B+4IpYULMgxcQS8ayV994Bps1nRYy2pqQ6NgO3A8eAceC/Rtaes/zPAG85M9R/Ahvk8/6COtrXTn9BBqVtbxDerSxviYw95T81JfwxscQWcF0sclpeTwKbcjLeMDjcyHi/YnYjpyFtEp5bRo7r8vodkbVnUuHq8J40yrdWM2M64b6MuZooQYEDwAiwhnYC7h75f0Q+C3VglEH5kfA46fDecmR7sihnXxQkANwtuBl5OmgGGAJeAR5LUIZ2TtP4i9uBjWKVnwXGgI8DNxn+Z4D/ABeAk8DfgMNynXZ4iRPwuyU8Dkmb/R7+msCneindoUw+Y4asm6nUcPEqMBqAImtNtwDPAa9LXN/KeV2WIOA5aZOA5Sovo8KjG962HNmeKdCAC/MBQ2J9vqFrs5ZjjtANY0m3At8x7VgYm5a/TdOeezWde20bJ4HvyjNwoFD/jjE3y+qD0pMia08th6oADwEfGWtRQRQ733bw2FritwQurMAzAUvMesWmHX3vtDzLHQ3qd942eK/822DioV7NIvSZCOKjgEK2mHt1+K6R+LrldFyr4Ct24PEAcJeBEuV/S+D7NpLr2fUGVep6EfASMAUcAbY5YaJGThdyKr7pXHGOjrhg+LJR1zbheUpkOCAy9QzuZ53CjwKrPTE6wC6PcyvKyrNAl33mLqNcy/+YCRqqlLyc41jxwM4ex4rzKPuU4PVRSRNMBpQcZxhFLeHJhSM8DrtymdGGM3R3dYH1sQkvx8wzlgIrxUG+QHtt+JIngkmDpJ0Orw0WyS4LtagnjELiBKuMUzrg3xIKJk2GVgO7ZaTYtpOipRawtdcdbV44uoP21pE4QRHNFL+gHTBhOqBhYnJfzmgF8JJR8ExKx18UXhfF9pbIWNLvUxQwbbKn24BzjtLt/+eB4ZQR4GZNHwX+leL0lbc3zCiIFgP0fCOj4H+WpBqi5FAHXAJuy5iPsR1xG/BmRkN4vupQpLAwLJARinis8hVWbpLIxoWl2Lx3d4ehoXbCkDwr1AnK5wfCe2V3YKvALyZYvyr3hEQx1uKOBBynvv5cDgvVe1fKM0OOWXl9sSqTr5D1LwfOBhyvzdNs9MTg+wJWqsr5ek7l6P0bE/JN6pDPigyljYKyvHyfCLIdWCXCuM+K5b6fSN6+n9ntJYjDJCF3vy4nb5rnPwz82KwRuHqJhfftwkOlfIEq+4ATY/ssbMiZ8PSb7KgPurStwxmdcNIEcShhhOrIGK9iGkLzQFOeSMYqdY8HRtTSHg58164t3NlFvO6mRaYDc44pwotIC4btSZiogn2Z8OKMphNGPQrUdgclEknqwO914SR11K1idtUttAiTtgKWRS9d+QCtwXKjhSgBGzcFMFzx9qAM/8jBYMXbK8CfDGT5fMy3aS81xjmgSL/zgfCCxxe0HFl8vi7y6CVzzVrWbR467Adlar9CBFflNDwKvi+A0SrU/gT40O/8KmBV2mkjwA/l/25Gwf6AsUSOLLHzXfUbtxi9DBp9NYqAHJhbk3VBrgngD7R3jrmZwwHgeCDO1mH+YIIRWBh6PyF/5CbQluScqT8YgCB95jHTtjWaL4oOJoAPRS+F1ayl1WTZa7uDkStNOtiXSpg0E680X/L9lORck/YS6AM5OiHKwa/y9aUUnXRds5ZUk+Uuth+nXZmiD7rLWGccsKiBDMm0iPYuhvMJqYymSdA9YnhvdNABAympj2lm148bkirRmfR1j166rlmzEOCryfJBynpnktRK6ICjnmclGcGOlGRe0xjJDuf7WYU/mtABLWfitz4AWb6atcEkOXthcpG0y7gpCvy5YK3OlkOBwlLgZ8BvgPuZu8OuMnv8Xevbu0AQ5Pqi1SZFnWVlaxp41cCSL0W9RP4uS4GgmfmGICv42pKc8Cc6iBJUgMeMwEmL+e7k7wjwA9qLMsOe9m9mdlE/qxPeXrYT9oWhZ5ww9GBJYWhSVPS0aTNtsd2X6TwH/BH4paQhvmp8TKvDMHSzCUNVL2dEV+u6DUN9fsKdiPnuaZiZblI6eQfhYou0TnhCZspZ9xQ1ybcLQ3k/mCAnnolY4T62kTBh6gso6acp2cy9OZnU9h9gtiCkk/1FOjK08GIm4bvK+yuBXFDIqZd2fE7RybhVOTFSO30Y+IXTuXk3eiWNgNKScQudjt7dRTbTjrzHmV1st5utuukM5fmKGEol1wTGcyzIdDoibUd8RRZqfPjf6Vb3yi7IWIt+NiFa0fde7mIUEIizH5XJ2ynSN4Clwc+zBfC3YAs3eRblu5082pG0XODpRxJ6niP71vd5WZSfj1GQdVvKSDezRk9H+Nq5FbhXFnKSwtLKb0uxo2CY9qpTJxuz+gvkoc+kHbTt8YTZ9KLZmGWt+XmybU1800QcRVW+28neKPCXFD/g7juq9C5pG6W8QbY9mcfEidJlRzS4cXPusYyG8LuUiValqJPt6TPGOl+Sqb2r0D4PLKRtT385Q/5IHe+HtIs/FtXpizoKtpKtQMOWlO5hbp1ZVhqT756mswKNLYsBenw5EYWDnWQrUbKWepn20ugLtMuQRmgvvigtlfcelvb3MbfCvpsSpUaVYccdBSrY7oxJtDiA15OS7j4q13HqIj1vCnaU2WI61zHuJHuZqs1gxtRlqqmTr/uB39JeFbvKjYXaamHbyFeoHVNMofZ5kgu1r1KhQu0sRxVs9cDRGto70+b7qIJxebYLO1sJH1XwSK866CIO6/gm83NYxyl5lms4OmGr3GEdZRxXc4LyjqtZ4XGslT6uppMDm6YIL264BzZ9jWIObHqdHj6wqUiHcgfhYymb8qy/SpLLd7xk01jlJO09Pa/SPrJsg+DvvfKcpCPLTgiMHKK9OHPGUXzs4VN3Mp+VXNHn8R9ZpnyO9aLzXehD+1ZSwUP7ivQB9bGVPRAFfZr64NaOhSlyJLhHF5+WeLuMo4sHmD26+O+Uc3TxoMjySXr86OK0qXrRB2o/zdzDu9+T98p4VlmylOoT6uPrFyFplHLIE23p/4eof8aqtFGFzEDPE/4VpfOkn6RVCczu5WxraBddxI3rwHUHlDQS5iuyqzvAoWtmcueSTpqu1R1QPOnxBVOST4o8TjiSPM4Us0cZ1FRCFBSqWat/zHMefYD7c7a/psCarJqyw+Yg9Q86L1gn1D9p3iOQVENOTTXVVFNNNdXUOf0PSKdJ1Y6mmA8AAAAASUVORK5CYII=" data-dark="data:image/png;base64,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"><span id="themeLabel"></span></button>
       <div id="setMsg"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="adminOverlay">
+    <div class="info-popup">
+      <button class="info-popup-close" id="adminClose" aria-label="Fermer" type="button">&times;</button>
+      <h2>Panel admin</h2>
+      <form id="adminForm">
+        <label class="adm-label" for="admTarget">Destinataire</label>
+        <select class="adm-field" id="admTarget">
+          <option value="all">Tous les utilisateurs</option>
+          <option value="one">Un utilisateur précis (UID)</option>
+        </select>
+        <div id="admUidRow" hidden>
+          <label class="adm-label" for="admUid">UID de l'utilisateur</label>
+          <input class="adm-field" id="admUid" autocomplete="off" placeholder="UID Firebase">
+        </div>
+        <label class="adm-label" for="admText">Annonce</label>
+        <textarea class="adm-field" id="admText" rows="5" maxlength="500" placeholder="Ton message (500 caractères max)"></textarea>
+        <button class="pill" id="admSend" type="submit">Envoyer l'annonce</button>
+      </form>
+      <div id="admMsg"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="annOverlay">
+    <div class="info-popup ann-popup">
+      <div class="score-label">ANNONCE</div>
+      <div id="annText"></div>
+      <button class="pill" id="annOk" type="button">OK</button>
     </div>
   </div>
 
@@ -461,7 +507,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDocFromServer, collection, query, orderBy, limit, where, getDocs, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocFromServer, addDoc, onSnapshot, collection, query, orderBy, limit, where, getDocs, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
   // ⚠️ Remplace par la config de ton projet (Firebase > Paramètres du projet > Vos applications)
   const firebaseConfig = {
@@ -546,8 +592,9 @@
   function closeName(){ $('nameOverlay').classList.remove('open'); }
 
   onAuthStateChanged(auth, async function(u){
-    user = u; name = null; sent = -1; ui();
+    user = u; name = null; sent = -1; ui(); adminUi(); stopAnn();
     if (!u){ loadBoard(); return; }
+    startAnn();
     try {
       var d = await getDocFromServer(ref());
       if (d.exists()){
@@ -607,6 +654,127 @@
     if (wait > 0){ setMsg('Tu pourras changer ton pseudo dans ' + Math.ceil(wait / 60000) + ' min.'); return; }
     closeSettings(); openName();
   });
+
+  // ---------- Compte admin + annonces ----------
+  // Seul compte admin. L'affichage du bouton n'est qu'un confort : c'est firestore.rules qui bloque
+  // réellement toute écriture d'annonce venant d'un autre compte.
+  const ADMIN_UID = 'eMK0LTWwkQVGzho9MuiN4drVoZ32';
+  const isAdmin = function(){ return !!user && user.uid === ADMIN_UID; };
+
+  function adminUi(){
+    $('adminBtn').hidden = !isAdmin();
+    if (!isAdmin()) $('adminOverlay').classList.remove('open');
+  }
+  function setAdm(t){ $('admMsg').textContent = t || ''; }
+  function closeAdmin(){ $('adminOverlay').classList.remove('open'); }
+
+  $('adminBtn').addEventListener('click', function(){
+    if (!isAdmin()) return;
+    setAdm('');
+    $('adminOverlay').classList.add('open');
+  });
+  $('adminClose').addEventListener('click', closeAdmin);
+  $('adminOverlay').addEventListener('click', function(e){ if (e.target === $('adminOverlay')) closeAdmin(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAdmin(); });
+  $('admTarget').addEventListener('change', function(){ $('admUidRow').hidden = $('admTarget').value !== 'one'; });
+
+  $('adminForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if (!isAdmin()) return;
+    var text = $('admText').value.trim();
+    var one = $('admTarget').value === 'one';
+    var uid = $('admUid').value.trim();
+    if (!text){ setAdm("Écris le texte de l'annonce."); return; }
+    if (one && !/^[A-Za-z0-9_-]{6,128}$/.test(uid)){ setAdm("L'UID est invalide."); return; }
+    var btn = $('admSend');
+    btn.disabled = true;
+    try {
+      await addDoc(
+        one ? collection(db, 'userMessages', uid, 'items') : collection(db, 'announcements'),
+        { message: text, createdAt: serverTimestamp() }
+      );
+      var info = 'Annonce envoyée à tous les utilisateurs.';
+      if (one){
+        info = 'Annonce envoyée à ' + uid + '.';
+        // Aide à repérer une faute de frappe : on cherche le pseudo lié à cet UID
+        try {
+          var p = await getDoc(doc(db, 'leaderboard', uid));
+          info = p.exists()
+            ? 'Annonce envoyée à ' + p.data().name + ' (' + uid + ').'
+            : 'Annonce envoyée à ' + uid + '. Aucun pseudo trouvé pour cet UID : vérifie-le (ou la personne n\'a pas encore choisi de pseudo).';
+        } catch(_) {}
+      }
+      $('admText').value = '';
+      setAdm(info);
+    } catch(err) {
+      setAdm("Impossible d'envoyer l'annonce.");
+    }
+    btn.disabled = false;
+  });
+
+  // ----- Réception : chaque annonce n'est affichée qu'une seule fois par utilisateur -----
+  // « Vue » = enregistrée dans seen/{uid}/items/{id} (Firestore, donc valable sur tous les appareils)
+  // et mémorisée en localStorage (évite des lectures inutiles et un 2e affichage si l'écriture échoue).
+  var annUnsubs = [], annQueue = [], annKnown = {}, annShowing = false;
+
+  function seenKey(){ return 'tm_seen_' + user.uid; }
+  function seenLocal(){ try { return JSON.parse(localStorage.getItem(seenKey())) || {}; } catch(e) { return {}; } }
+  function markLocal(key){ try { var s = seenLocal(); s[key] = 1; localStorage.setItem(seenKey(), JSON.stringify(s)); } catch(e) {} }
+
+  async function offer(key, data){
+    var u = user;
+    if (!u || annKnown[key] || seenLocal()[key]) return;
+    annKnown[key] = 1;
+    try {
+      var s = await getDoc(doc(db, 'seen', u.uid, 'items', key));
+      if (s.exists()){ markLocal(key); return; }
+    } catch(e) { delete annKnown[key]; return; }
+    if (user !== u) return; // déconnexion / changement de compte pendant la vérification
+    var t = data.createdAt && data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now();
+    annQueue.push({ key: key, message: String(data.message || ''), t: t });
+    annQueue.sort(function(a, b){ return a.t - b.t; });
+    showNextAnn();
+  }
+
+  function showNextAnn(){
+    if (annShowing || !annQueue.length || !user) return;
+    var a = annQueue.shift();
+    annShowing = true;
+    $('annText').textContent = a.message;
+    $('annOverlay').classList.add('open');
+    markLocal(a.key);
+    setDoc(doc(db, 'seen', user.uid, 'items', a.key), { seenAt: serverTimestamp() }).catch(function(){});
+  }
+  function closeAnn(){
+    $('annOverlay').classList.remove('open');
+    annShowing = false;
+    showNextAnn(); // s'il y en a d'autres en attente, on affiche la suivante
+  }
+  $('annOk').addEventListener('click', closeAnn);
+  $('annOverlay').addEventListener('click', function(e){ if (e.target === $('annOverlay')) closeAnn(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && $('annOverlay').classList.contains('open')) closeAnn(); });
+
+  function startAnn(){
+    stopAnn();
+    var u = user;
+    // Les annonces « pour tous » ne concernent que les comptes déjà créés au moment de l'envoi
+    var since = new Date(u.metadata.creationTime);
+    if (isNaN(since.getTime())) since = new Date(0);
+    var qAll = query(collection(db, 'announcements'), where('createdAt', '>', since), orderBy('createdAt', 'desc'), limit(10));
+    var qMine = query(collection(db, 'userMessages', u.uid, 'items'), orderBy('createdAt', 'desc'), limit(10));
+    [[qAll, 'a_'], [qMine, 'm_']].forEach(function(p){
+      annUnsubs.push(onSnapshot(p[0], function(snap){
+        snap.docChanges().forEach(function(c){
+          if (c.type === 'added') offer(p[1] + c.doc.id, c.doc.data({ serverTimestamps: 'estimate' }));
+        });
+      }, function(){}));
+    });
+  }
+  function stopAnn(){
+    annUnsubs.forEach(function(f){ f(); });
+    annUnsubs = []; annQueue = []; annKnown = {}; annShowing = false;
+    $('annOverlay').classList.remove('open');
+  }
 </script>
 
 </body>
