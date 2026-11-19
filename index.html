@@ -286,6 +286,41 @@
   .ann-popup{text-align:center;}
   .ann-popup .score-label{margin-bottom:16px;}
   #annText{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.6;font-weight:600;margin-bottom:24px;}
+
+  /* ---------- Classement complet ---------- */
+  #lbPanel{cursor:pointer;transition:box-shadow 0.2s ease;}
+  #lbPanel:hover,#lbPanel:focus-visible{box-shadow:0 0 0 2px var(--ink);outline:none;}
+  #lbHint{font-size:11px;font-weight:700;color:var(--ink-soft);text-align:center;}
+  #lbAllMe{font-size:13px;font-weight:700;color:var(--ink-soft);min-height:1em;}
+  #lbAllList{margin:12px 0;padding:0;list-style:none;}
+  #lbAllList li{display:flex;gap:12px;padding:8px 10px;border-radius:8px;font-variant-numeric:tabular-nums;}
+  #lbAllList li.me{background:var(--red-soft);}
+  #lbAllList .rk{min-width:40px;color:var(--ink-soft);font-weight:700;}
+  #lbAllList .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
+  #lbAllList .sc{font-weight:800;}
+  #lbAllMsg{font-size:13px;color:var(--ink-soft);min-height:1em;}
+  #lbAllMore{margin-top:4px;}
+
+  /* ---------- Chat en direct ---------- */
+  .chat-button{right:auto;left:20px;bottom:auto;top:50%;margin-top:-20px;}
+  .chat-panel{position:fixed;left:72px;top:70px;bottom:20px;width:min(360px,calc(100vw - 92px));z-index:150;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;background:var(--bg-soft);box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+  .chat-panel[hidden],#chatForm[hidden]{display:none;}
+  .chat-head{position:relative;text-align:center;}
+  .chat-head .info-popup-close{top:-6px;right:-6px;}
+  #chatList{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45;}
+  .chat-msg{padding:6px 10px;border-radius:10px;background:var(--bg);overflow-wrap:anywhere;}
+  .chat-msg.me{background:var(--red-soft);}
+  .chat-name{font-weight:800;font-size:12px;margin-right:6px;}
+  .chat-time{font-size:11px;color:var(--ink-soft);}
+  .chat-text{font-weight:600;}
+  .chat-empty{margin:auto;text-align:center;font-size:13px;font-weight:700;color:var(--ink-soft);}
+  #chatForm{display:flex;gap:8px;}
+  #chatInput{flex:1;min-width:0;font:600 14px 'Manrope',sans-serif;padding:8px 14px;border:2px solid var(--bg);border-radius:999px;background:var(--bg);color:var(--ink);}
+  #chatSend{min-width:76px;}
+  #chatSend:disabled{opacity:0.5;cursor:default;}
+  #chatSend:disabled:hover{background:var(--bg);color:var(--ink);}
+  #chatNote{font-size:12px;font-weight:700;color:var(--ink-soft);min-height:1em;text-align:center;}
+  @media (max-width:520px){ .chat-panel{left:12px;right:12px;width:auto;top:64px;bottom:12px;} }
 </style>
 </head>
 <body>
@@ -337,10 +372,11 @@
   </div>
 
   <div class="lb-wrap">
-    <section class="lb-panel" aria-label="Classement">
+    <section class="lb-panel" id="lbPanel" aria-label="Classement : voir le classement complet" role="button" tabindex="0" title="Voir le classement complet">
       <div class="score-label">CLASSEMENT</div>
       <ol id="lbList"></ol>
       <div id="lbMe"></div>
+      <div id="lbHint">Voir tout le classement ›</div>
     </section>
     <section class="lb-panel online-panel" aria-label="Joueurs en ligne">
       <div class="score-label">EN LIGNE</div>
@@ -352,6 +388,32 @@
   <button class="info-button set-button" id="setBtn" aria-label="Paramètres" type="button"><img class="gear" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdklEQVR42uWbS28cRRDHfzNe2wmYYAUnxlgCJEQwDyFOXDgA5iMgJUKKkq8BkbCTSxJFicKFxwEhcoFDvgOxj3Yk+4gVg4QDyHFIDii8nN2d4eAqqbY9u/Ps8drbUitZa7q6q7q66t//7g7wXwIgTvjbYWBYfreAf4EoQ9vKB1eH8sPAR8As8CIwAYwBI/LdY+Bv4AHwC3AL+E7+7t0Ivkoog58ClkSJPPU2MC0ywv1qgBBYEIW2gaa4e1tqJFV/t6RuS5tFYGg/GmBI/n1fFGkW8ABtM+vIrHyWfMaWt0uu31hkeItXPl0rAJ4qOfAAOOIzWPsygLrxiQpkvWzk7WkJMs6EBr+nJa3FEujyxgBt80BkhRknLKjaY4KEANTo0klgcvtFUaBVQPnYaXtRZI706LeREIiDKpfIMDCe0ElDqjXSSZPWohIGiEzaPJmhX2SMw1Usc234HPAFsA7cB1aBTwTNueUZ4ILJ72WUt0bQekH6cMuEjGlVxrguY55OM0LQQ/kIeAn4AXg+4Zv7AnLW5PcrwHvApAlYQYVBVeVtmX4DYEb6PZ7Q7i7wAfCT0Snzmh8FVgyKaxvU1sqwbn3UtH7tGBVNrooumWOCrqnrIuBxD9dsOjXyqHyRfnXs17OiSf3gHQNH61DKt7Fi0SnVCKF8sFKDO9dVVYeVtI2V5tEzB0h51whnHV13oadR4I4JJAfFABoc74iOu9CiWuTUAZx91wtOJXmBrotFg77qmJW2k758GyASDNEBjvQ/U8A/JTYveaNyNxLEZ9+xcI9Tqrt1gyOyPnyVtsHwAL8KmgQ4Jmiz4Xzro4wKT7HpwuExGVDbQwDUJfU7MA+8JbS4lkPAm8CcfOMjDqleW6JrB1RXa1+Tj//zoPw3MtNpe/dj8m3VRlCdriYBIqWexyQQxhV5gSow72Sc0FFc+7dL8nyFRlBdFkTHMGlfEJg1ctnZipZR/oajeJZtuBriRkkj2PFfMjEuyEInnS6REjWtbeaks1xabRy4VwKYaeo7nYcus7TWlYIzoKnu027QM0PRNvMFzxZ0zFdS6LTUGXhYABuo57xW4mhL1+kbBYCSJVTHC3hgR5S8mXMG1FU3jCcVYYZsTLqbMzDrWG+mbYHDDPTyWkH6aotyp7uxtN0WWRSQs5a27n2fDPV9CTOc7swUVHxS3DcusQRikXG8oFFnip4qVREE2xLAygbB10sEwYdpQTDsccoSAeeAozKAPNZvi+wPZSBFDRCLjFBk5vGetoz9nOjSyIoBqgZCRdKQPV/crAsI2bRzqU+g8LcVQuHLvaCw783Q+QKboTkPm6HFbpshBQpX+2A7PAF87XE7fM0FR5YQ2aqBEJkT8uNQF0LktzoJkcAcGp4AfjTRt2og49JcG4YSm3QOYH1QYqpTBLwqFHkHJ/hI3OQJT6BryMxEA3hBqi0t+c4XH4jo+Mg9Bg8l3Syb6OkLHjccsGRBTgN/EFr7uC26hkAUOoDoq5owfGDOIYe6UVSe+v0yCQQO/NGYZWDOHuDD0TNpDNVAH49bcDCwFyTsB58xgFdkNCDqJalV9v8lqRV6XJKq6pqcMkfvAs/i95rcPdnUZL0mNwv8TI5rci5ZMk1/XZQ8mtDvBPAxnRclP2fnkmcp7nOgr8q6McHFDANxWTpt755GZ1VxXf4PPF6XD3MGoiz0ciQD+FMCKDkJTZw2t0RWkDGI5aLBfb4ZCgR7ly3reHgEUcfJUCz77niPZeyJAXTAy5R/NLXkyNw3JenhZIv0h5NNg+IWKHi03S8GCASMLBfIAkvs3Ofz+nS2rsfTI+x+PP0knY+n/5KUtyHZ43vxBq+Pp+uioeIE7zhswEuTnefzcYa2lZb/AYov1r/xYa4JAAAAAElFTkSuQmCC"></button>
 
   <button class="info-button admin-button" id="adminBtn" aria-label="Panel admin" type="button" hidden><img class="gear" alt="" src="data:image/png;base64,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"></button>
+
+  <button class="info-button chat-button" id="chatBtn" aria-label="Chat" aria-expanded="false" type="button"><img class="gear" alt="" src="data:image/png;base64,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"></button>
+
+  <section class="chat-panel" id="chatPanel" aria-label="Chat en direct" hidden>
+    <div class="chat-head">
+      <div class="score-label">CHAT</div>
+      <button class="info-popup-close" id="chatClose" aria-label="Fermer le chat" type="button">&times;</button>
+    </div>
+    <div id="chatList" role="log" aria-live="polite"></div>
+    <form id="chatForm" autocomplete="off">
+      <input id="chatInput" maxlength="200" placeholder="Écris un message…" aria-label="Message">
+      <button class="pill" id="chatSend" type="submit">Envoyer</button>
+    </form>
+    <div id="chatNote"></div>
+  </section>
+
+  <div class="overlay" id="lbAllOverlay">
+    <div class="info-popup">
+      <button class="info-popup-close" id="lbAllClose" aria-label="Fermer" type="button">&times;</button>
+      <h2>Classement complet</h2>
+      <div id="lbAllMe"></div>
+      <ol id="lbAllList"></ol>
+      <div id="lbAllMsg"></div>
+      <button class="pill" id="lbAllMore" type="button" hidden>Voir plus</button>
+    </div>
+  </div>
 
   <div class="overlay" id="setOverlay">
     <div class="info-popup">
@@ -507,7 +569,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, getDocFromServer, addDoc, onSnapshot, collection, query, orderBy, limit, where, getDocs, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocFromServer, addDoc, onSnapshot, runTransaction, deleteDoc, startAfter,collection, query, orderBy, limit, where, getDocs, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
   // ⚠️ Remplace par la config de ton projet (Firebase > Paramètres du projet > Vos applications)
   const firebaseConfig = {
@@ -529,6 +591,7 @@
     $('logoutBtn').hidden = !user;
     $('userName').textContent = user ? (name || 'Pseudo à choisir') : '';
     $('nameInput').value = name || '';
+    chatUi();
   }
 
   async function sync(){
@@ -592,7 +655,7 @@
   function closeName(){ $('nameOverlay').classList.remove('open'); }
 
   onAuthStateChanged(auth, async function(u){
-    user = u; name = null; sent = -1; ui(); adminUi(); stopAnn();
+    user = u; name = null; sent = -1; ui(); adminUi(); stopAnn(); chatReset();
     if (!u){ loadBoard(); return; }
     startAnn();
     try {
@@ -775,6 +838,192 @@
     annUnsubs = []; annQueue = []; annKnown = {}; annShowing = false;
     $('annOverlay').classList.remove('open');
   }
+
+  // ---------- Classement complet (clic sur le classement) ----------
+  // Chargé par blocs de 100 joueurs pour ne pas lire toute la base d'un coup.
+  var LB_PAGE = 100, lbAllLast = null, lbAllRank = 0, lbAllBusy = false, lbAllRun = 0;
+
+  async function loadLbAll(){
+    if (lbAllBusy) return;
+    lbAllBusy = true;
+    var run = lbAllRun, ul = $('lbAllList'), more = $('lbAllMore'), msg = $('lbAllMsg');
+    more.hidden = true; msg.textContent = 'Chargement…';
+    try {
+      var q = lbAllLast
+        ? query(col, orderBy('score', 'desc'), startAfter(lbAllLast), limit(LB_PAGE))
+        : query(col, orderBy('score', 'desc'), limit(LB_PAGE));
+      var snap = await getDocs(q);
+      if (run !== lbAllRun) return; // fenêtre fermée / rouverte entre-temps
+      snap.forEach(function(d){
+        lbAllRank++;
+        var x = d.data(), li = document.createElement('li');
+        if (user && d.id === user.uid) li.className = 'me';
+        [['rk', lbAllRank], ['nm', x.name], ['sc', x.score.toLocaleString('fr-FR')]].forEach(function(c){
+          var sp = document.createElement('span'); sp.className = c[0]; sp.textContent = c[1]; li.appendChild(sp);
+        });
+        ul.appendChild(li);
+      });
+      if (snap.size) lbAllLast = snap.docs[snap.docs.length - 1];
+      more.hidden = snap.size < LB_PAGE;
+      msg.textContent = lbAllRank ? '' : 'Aucun score pour le moment.';
+    } catch(e) {
+      if (run === lbAllRun) msg.textContent = 'Classement indisponible.';
+    }
+    if (run === lbAllRun) lbAllBusy = false;
+  }
+
+  async function openLbAll(){
+    var run = ++lbAllRun;
+    lbAllLast = null; lbAllRank = 0; lbAllBusy = false;
+    $('lbAllList').replaceChildren();
+    $('lbAllMe').textContent = '';
+    $('lbAllOverlay').classList.add('open');
+    loadLbAll();
+    if (user && name){
+      try {
+        var c = await getCountFromServer(query(col, where('score', '>', sent)));
+        if (run === lbAllRun) $('lbAllMe').textContent = 'Ta position : #' + (c.data().count + 1);
+      } catch(e) {}
+    }
+  }
+  function closeLbAll(){ lbAllRun++; $('lbAllOverlay').classList.remove('open'); }
+
+  $('lbPanel').addEventListener('click', openLbAll);
+  $('lbPanel').addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLbAll(); }
+  });
+  $('lbAllMore').addEventListener('click', loadLbAll);
+  $('lbAllClose').addEventListener('click', closeLbAll);
+  $('lbAllOverlay').addEventListener('click', function(e){ if (e.target === $('lbAllOverlay')) closeLbAll(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeLbAll(); });
+
+  // ---------- Chat en direct ----------
+  // Messages numérotés (seq) par le compteur chatState/main : seuls les messages hors des 50 derniers
+  // peuvent être supprimés (voir firestore.rules). Le délai de 10 s est aussi imposé par les règles.
+  var CHAT_MAX = 50, CHAT_GAP_MS = 10000;
+  var chatOpen = false, chatUnsub = null, chatNext = 0, chatSending = false, chatTick = null, chatStick = true;
+  var chatStateRef = function(){ return doc(db, 'chatState', 'main'); };
+
+  function chatNote(t){ $('chatNote').textContent = t || ''; }
+
+  function chatUi(){
+    $('chatForm').hidden = !user;
+    if (!user){
+      var empty = document.createElement('div');
+      empty.className = 'chat-empty';
+      empty.textContent = 'Connecte-toi avec Google pour lire et écrire dans le chat.';
+      $('chatList').replaceChildren(empty);
+      chatNote('');
+    } else if (!name) chatNote('Choisis un pseudo pour pouvoir écrire dans le chat.');
+    else if ($('chatNote').textContent.indexOf('pseudo') !== -1) chatNote('');
+  }
+
+  function chatSendBtn(){
+    var left = Math.ceil((chatNext - Date.now()) / 1000), b = $('chatSend');
+    b.disabled = chatSending || left > 0;
+    b.textContent = left > 0 ? left + ' s' : 'Envoyer';
+  }
+
+  function chatRender(snap){
+    if (!user) return;
+    var list = $('chatList');
+    var near = chatStick || list.scrollHeight - list.scrollTop - list.clientHeight < 60;
+    list.replaceChildren();
+    if (snap.empty){
+      var empty = document.createElement('div');
+      empty.className = 'chat-empty';
+      empty.textContent = 'Aucun message pour le moment. Lance la conversation !';
+      list.appendChild(empty);
+    }
+    snap.docs.slice().reverse().forEach(function(d){
+      var x = d.data({ serverTimestamps: 'estimate' });
+      var row = document.createElement('div'), nm = document.createElement('span'),
+          tm = document.createElement('span'), tx = document.createElement('div');
+      row.className = 'chat-msg' + (x.uid === user.uid ? ' me' : '');
+      nm.className = 'chat-name'; nm.textContent = x.name;
+      tm.className = 'chat-time';
+      if (x.createdAt && x.createdAt.toDate) tm.textContent = x.createdAt.toDate().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+      tx.className = 'chat-text'; tx.textContent = x.text;
+      row.appendChild(nm); row.appendChild(tm); row.appendChild(tx);
+      list.appendChild(row);
+    });
+    if (near) list.scrollTop = list.scrollHeight;
+    chatStick = false;
+  }
+
+  function chatStart(){
+    if (chatUnsub || !user) return;
+    var u = user;
+    chatStick = true;
+    chatUnsub = onSnapshot(
+      query(collection(db, 'chat'), orderBy('seq', 'desc'), limit(CHAT_MAX)),
+      chatRender,
+      function(){ chatNote('Chat indisponible pour le moment.'); }
+    );
+    // Reprend le délai de 10 s même après un rechargement de la page
+    getDoc(doc(db, 'chatLimit', u.uid)).then(function(s){
+      if (user !== u || !s.exists()) return;
+      var t = s.data().lastAt;
+      if (t && t.toMillis) chatNext = Math.max(chatNext, Math.min(t.toMillis() + CHAT_GAP_MS, Date.now() + CHAT_GAP_MS));
+    }).catch(function(){});
+  }
+  function chatStop(){ if (chatUnsub){ chatUnsub(); chatUnsub = null; } }
+  function chatReset(){
+    chatStop(); chatNext = 0; chatStick = true;
+    $('chatList').replaceChildren(); chatNote(''); chatUi();
+    if (chatOpen) chatStart();
+  }
+
+  function setChat(open){
+    chatOpen = open;
+    $('chatPanel').hidden = !open;
+    $('chatBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    clearInterval(chatTick); chatTick = null;
+    if (open){
+      chatStart(); chatSendBtn();
+      chatTick = setInterval(chatSendBtn, 250);
+      if (user && name && window.matchMedia('(hover: hover)').matches) $('chatInput').focus();
+    } else chatStop();
+  }
+  $('chatBtn').addEventListener('click', function(){ setChat(!chatOpen); });
+  $('chatClose').addEventListener('click', function(){ setChat(false); });
+
+  async function chatPrune(seq){
+    try {
+      var s = await getDocs(query(collection(db, 'chat'), where('seq', '<=', seq - CHAT_MAX), limit(25)));
+      await Promise.allSettled(s.docs.map(function(d){ return deleteDoc(d.ref); }));
+    } catch(e) {}
+  }
+
+  $('chatForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var text = $('chatInput').value.trim();
+    if (!user || chatSending || !text) return;
+    if (!name){ openName('Choisis un pseudo pour écrire dans le chat.'); return; }
+    if (Date.now() < chatNext) return;
+    var u = user, nm = name;
+    chatSending = true; chatSendBtn(); chatNote('');
+    try {
+      var seq = await runTransaction(db, async function(tx){
+        var st = await tx.get(chatStateRef());
+        var n = (st.exists() ? st.data().n : 0) + 1;
+        var m = doc(collection(db, 'chat'));
+        tx.set(doc(db, 'chatLimit', u.uid), { lastAt: serverTimestamp() });
+        tx.set(m, { uid: u.uid, name: nm, text: text, createdAt: serverTimestamp(), seq: n });
+        tx.set(chatStateRef(), { n: n, lastId: m.id });
+        return n;
+      });
+      chatNext = Date.now() + CHAT_GAP_MS;
+      if (user === u){ $('chatInput').value = ''; chatStick = true; }
+      chatPrune(seq);
+    } catch(err) {
+      if (err && err.code === 'permission-denied'){
+        chatNext = Date.now() + 5000;
+        chatNote('Message refusé : attends quelques secondes entre deux messages.');
+      } else chatNote("Impossible d'envoyer le message.");
+    }
+    chatSending = false; chatSendBtn();
+  });
 </script>
 
 </body>
