@@ -329,6 +329,12 @@
   #adminForm .pill{margin-top:16px;}
   #admMsg{font-size:13px;color:var(--ink-soft);margin-top:12px;min-height:1em;line-height:1.5;}
   #annOverlay{z-index:200;}
+  /* Vérification de présence (anti-AFK) : par-dessus tout le reste */
+  #afkOverlay{z-index:300;}
+  .afk-popup{text-align:center;}
+  #afkText{margin:8px 0 14px;font-weight:600;line-height:1.6;}
+  .afk-zone{position:relative;height:72px;}
+  .afk-zone .pill{position:absolute;left:0;top:0;padding:12px 22px;font-size:14px;white-space:nowrap;}
   .ann-popup{text-align:center;}
   .ann-popup .score-label{margin-bottom:16px;}
   #annText{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.6;font-weight:600;margin-bottom:24px;}
@@ -428,6 +434,8 @@
       <p>4. Il est possible qu'une partie du code ait été généré avec l'outil claude.ai</p>
       <br>
       <p>5. Il est possible que les renseignement de votre compte google soit subtilisé sans aucun avertissement</p>
+      <br>
+      <p>6. Toutes les 10 minutes, il faut confirmer que vous êtes toujours là pour continuer à gagner des points</p>
     </div>
   </div>
 
@@ -521,6 +529,14 @@
     </div>
   </div>
 
+  <div class="overlay" id="afkOverlay" role="alertdialog" aria-modal="true" aria-labelledby="afkTitle" aria-describedby="afkText">
+    <div class="info-popup afk-popup">
+      <h2 id="afkTitle">Es-tu toujours là ?</h2>
+      <p id="afkText"></p>
+      <div class="afk-zone" id="afkZone"><button class="pill" id="afkBtn" type="button">Je suis là</button></div>
+    </div>
+  </div>
+
   <div class="overlay" id="nameOverlay">
     <div class="info-popup">
       <button class="info-popup-close" id="nameClose" aria-label="Fermer" type="button">&times;</button>
@@ -575,6 +591,73 @@
     return document.visibilityState === 'visible' && document.hasFocus();
   }
 
+  // ---------- Anti-AFK ----------
+  // Le score ne monte que si la page est visible et active (isPageActive). Pour empêcher de laisser la page
+  // ouverte sans être devant l'écran, toutes les AFK_EVERY secondes de score on demande « Es-tu toujours là ? » :
+  //  - clic sur « Je suis là » dans les AFK_ANSWER_MS : on continue, et les secondes passées à répondre sont créditées ;
+  //  - sinon : score en pause (rien ne monte) jusqu'à un clic sur « Reprendre ».
+  // Le compteur est gardé dans localStorage : recharger la page ne remet pas la vérification à zéro.
+  // Le bouton change de place à chaque fois, et seuls les vrais clics (isTrusted) sont acceptés.
+  var AFK_EVERY = 10 * 60;        // secondes de score entre deux vérifications
+  var AFK_ANSWER_MS = 60 * 1000;  // temps pour répondre
+  var AFK_KEY = 'tm_afk_since';
+  var MAX_CREDIT = 3;             // secondes créditées au maximum par relevé (voir poll)
+  var afk = { since: 0, state: 'ok', deadline: 0, held: 0 }; // state : ok | asking | paused
+  try { afk.since = Math.max(0, parseInt(localStorage.getItem(AFK_KEY), 10) || 0); } catch(e) {}
+  var afkOverlay = document.getElementById('afkOverlay'), afkBtn = document.getElementById('afkBtn'),
+      afkZone = document.getElementById('afkZone'), afkTitleEl = document.getElementById('afkTitle'),
+      afkTextEl = document.getElementById('afkText'), afkPageTitle = document.title;
+
+  function saveAfk(){ try { localStorage.setItem(AFK_KEY, afk.since); } catch(e) {} }
+  function addScore(n){
+    score += n;
+    localStorage.setItem(SCORE_KEY, score);
+    scoreEl.textContent = score.toLocaleString('fr-FR');
+  }
+  function afkText(sec){
+    afkTextEl.textContent = afk.state === 'paused'
+      ? 'Tu sembles être parti : ton score ne monte plus. Clique sur le bouton pour reprendre.'
+      : 'Clique sur le bouton pour continuer à gagner des points. Sans réponse dans ' + sec + ' s, ton score sera mis en pause.';
+  }
+  function showAfk(){
+    var paused = afk.state === 'paused';
+    afkTitleEl.textContent = paused ? 'Score en pause' : 'Es-tu toujours là ?';
+    afkBtn.textContent = paused ? 'Reprendre' : 'Je suis là';
+    afkText(Math.max(0, Math.ceil((afk.deadline - Date.now()) / 1000)));
+    afkOverlay.classList.add('open');
+    // Position du bouton au hasard : un clic automatique à un endroit fixe ne suffit pas
+    afkBtn.style.left = Math.random() * Math.max(0, afkZone.clientWidth - afkBtn.offsetWidth) + 'px';
+    afkBtn.style.top = Math.random() * Math.max(0, afkZone.clientHeight - afkBtn.offsetHeight) + 'px';
+    document.title = (paused ? '⏸ ' : '❓ ') + afkTitleEl.textContent + ' — ' + afkPageTitle;
+  }
+  function askPresence(){
+    afk.state = 'asking'; afk.held = 0; afk.deadline = Date.now() + AFK_ANSWER_MS;
+    showAfk();
+  }
+  // Appelé pour chaque seconde jouée avec la page visible et active
+  function creditSeconds(n){
+    if (afk.state === 'ok' && afk.since >= AFK_EVERY) askPresence();
+    if (afk.state === 'paused') return;                   // en pause : rien ne monte
+    if (afk.state === 'asking'){ afk.held += n; return; } // on garde les secondes jusqu'à la réponse
+    addScore(n);
+    afk.since += n; saveAfk();
+  }
+  function afkTick(){
+    if (afk.state !== 'asking') return;
+    var left = afk.deadline - Date.now();
+    if (left <= 0){ afk.state = 'paused'; afk.held = 0; showAfk(); return; } // pas de réponse : pause
+    afkText(Math.ceil(left / 1000));
+  }
+  afkBtn.addEventListener('click', function(e){
+    if (!e.isTrusted) return; // clic simulé par un script : ignoré
+    if (afk.state === 'asking' && Date.now() <= afk.deadline + 1000 && afk.held > 0){
+      addScore(Math.min(afk.held, AFK_ANSWER_MS / 1000 + 5));
+    }
+    afk.state = 'ok'; afk.since = 0; afk.held = 0; saveAfk();
+    afkOverlay.classList.remove('open');
+    document.title = afkPageTitle;
+  });
+
   // On relit l'horloge réelle à intervalle rapproché plutôt que de calculer un
   // délai précis jusqu'à la prochaine seconde : cette dernière approche pouvait
   // dériver (une seconde sautée, rattrapée d'un coup la suivante). En sondant
@@ -588,13 +671,13 @@
     var currentSecond = Math.floor(Date.now() / 1000);
     var elapsedSeconds = currentSecond - lastScoreSecond;
     if (elapsedSeconds > 0){
-      if (isPageActive()){
-        score += elapsedSeconds;
-        localStorage.setItem(SCORE_KEY, score);
-        scoreEl.textContent = score.toLocaleString('fr-FR');
-      }
+      // Relevé normal = 1 s (200 ms d'intervalle). Un écart plus grand veut dire que le navigateur a mis la page
+      // en veille ou ralenti ses minuteurs (onglet en arrière-plan, ordinateur en veille) : ce temps n'est
+      // pas crédité, sinon il suffirait de basculer vers la page pour récupérer des minutes de score.
+      if (isPageActive()) creditSeconds(Math.min(elapsedSeconds, MAX_CREDIT));
       lastScoreSecond = currentSecond;
     }
+    afkTick();
   }
   poll();
   setInterval(poll, 200);
